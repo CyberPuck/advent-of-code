@@ -4,19 +4,11 @@
 //! - Read in a given file from stdin
 //! - Parse file with expected inputs
 //! - Panic if unexpected input reached
-//! - Print out the ELF to go to, with kcal amount
-//! 
-//! ```rust
-//! let file = "example1.txt";
-//! let best_elf = kcal_parser::get_elf(file);
-//! assertEq!(best_elf.index, 4);
-//! assertEq!(best_elf.kcals, 24000);
-//! ```
+//! - Print out the ELFs to go to, with kcal amount
 mod kcal_parser {
 
     //! Represents an Elf, index in array with kcal count
-
-    use core::{fmt, num};
+    use std::{fmt, num};
     use std::fs;
 
     #[derive(Clone, Eq, PartialEq, Ord)]
@@ -73,7 +65,7 @@ mod kcal_parser {
         return elfs;
     }
 
-    // Entry function for finding an the top X elfs based on kcal
+    /// Entry function for finding an the top X elfs based on kcal
     pub fn get_elfs(file_name: String, number_elfs: u32) -> Vec<Elf> {
         let mut elfs: Vec<Elf> = parse_file(file_name);
         elfs.sort();
@@ -84,19 +76,6 @@ mod kcal_parser {
         }
 
         return elfs[0..usize::try_from(number_elfs).unwrap()].to_vec();
-
-        /*let mut best_elf = Elf {
-            index: 0,
-            kcals: 0
-        };
-        for i in 0..elfs.len() {
-            if elfs.get(i).unwrap().kcals > best_elf.kcals {
-                best_elf.index = u32::try_from(i).unwrap();
-                best_elf.kcals = elfs.get(i).unwrap().kcals;
-            }
-        }
-
-        return best_elfs;*/
     }
 }
 
