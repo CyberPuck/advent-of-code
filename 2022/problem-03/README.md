@@ -26,4 +26,11 @@ ttgJtRGJQctTZtZT
 CrZsJsPPZsGzwwsLwLmpwMDw
 ```
 
-1. `vJrwpWtwJgWrhcsFMMfFFhFp`
+# Part 2, find total group priority
+
+The elfs are split into groups of three, this means every three lines in the
+file is an Elf Group (EG).  These EGs have a common item they carry, called
+a badge.  We need to find out what each EGs badge is and then sum them up.
+
+For this problem both total priority and total badge priority will be returned
+at the same time.

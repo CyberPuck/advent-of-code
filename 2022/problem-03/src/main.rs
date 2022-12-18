@@ -1,15 +1,27 @@
 pub mod pack_sorter {
     use std::fs;
 
-    #[derive(Debug)]
+    #[derive(Debug, Clone)]
     struct Pack {
         compartment_one: String,
         compartment_two: String,
     }
 
-    pub fn get_priority_sum(file_name: String) -> u32 {
+    #[derive(Debug)]
+    struct ElfGroup {
+        one: Pack,
+        two: Pack,
+        three: Pack,
+    }
+
+    /// Gets the priorities of both individual items and group badges.
+    /// Returns: (total_priority, badge_total_priority).
+    pub fn get_priority_sum(file_name: String) -> (u32, u32) {
         let mut total_priority = 0;
+        let mut total_badge_priority = 0;
         let packs = parse_file(file_name);
+        let groups = generate_groups(&packs);
+        // Part one calc
         for pack in packs {
             println!("{:?}", pack);
             let output = check_for_duplicates(pack);
@@ -22,7 +34,13 @@ pub mod pack_sorter {
                 total_priority += priority;
             }
         }
-        return total_priority;
+        // Part two calc
+        for group in groups {
+            let badge = get_group_badge(group);
+            let badge_priority = convert_char_to_priority(badge.unwrap());
+            total_badge_priority += badge_priority;
+        }
+        return (total_priority, total_badge_priority);
     }
 
     fn parse_file(file_name: String) -> Vec<Pack> {
@@ -72,9 +90,50 @@ pub mod pack_sorter {
         // 65 is ascii `A`, need to drop to starting priority of 27, 65 - 27 = 38
         return ascii_value - 38;
     }
+
+    fn generate_groups(packs: &Vec<Pack>) -> Vec<ElfGroup> {
+        let mut elfGroups: Vec<ElfGroup> = vec![];
+        let mut iter = packs.iter();
+        for _n in 0..packs.len() / 3 {
+            let group = ElfGroup {
+                one: iter.next().unwrap().clone(),
+                two: iter.next().unwrap().clone(),
+                three: iter.next().unwrap().clone(),
+            };
+            elfGroups.push(group);
+        }
+
+        return elfGroups;
+    }
+
+    fn get_group_badge(group: ElfGroup) -> Option<char> {
+        let badge_priority = 0;
+        for item in group.one.compartment_one.chars() {
+            if (group.two.compartment_one.contains(item)
+                || group.two.compartment_two.contains(item))
+                && (group.three.compartment_one.contains(item)
+                    || group.three.compartment_two.contains(item))
+            {
+                return Some(item);
+            }
+        }
+
+        for item in group.one.compartment_two.chars() {
+            if (group.two.compartment_one.contains(item)
+                || group.two.compartment_two.contains(item))
+                && (group.three.compartment_one.contains(item)
+                    || group.three.compartment_two.contains(item))
+            {
+                return Some(item);
+            }
+        }
+
+        return None;
+    }
 }
 
 fn main() {
     let priority = pack_sorter::get_priority_sum("input1.txt".to_string());
-    println!("Priority is: {}", priority);
+    println!("Priority is: {}", priority.0);
+    println!("Badge priority is {}", priority.1);
 }
