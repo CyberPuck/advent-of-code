@@ -11,15 +11,26 @@ pub mod elf_cleanup {
         end: u32,
     }
 
-    pub fn find_overlapping_pairs(file_name: String) -> u32 {
+    pub fn find_overlapping_pairs(file_name: String, parital_overlap: bool) -> u32 {
         let mut overlapping_pairs = 0;
         let pairs = parse_file(file_name);
 
-        for pair in pairs {
-            if pair.one.start <= pair.two.start && pair.one.end >= pair.two.end {
-                overlapping_pairs += 1;
-            } else if pair.two.start <= pair.one.start && pair.two.end >= pair.one.end {
-                overlapping_pairs += 1;
+        if parital_overlap {
+            for pair in pairs {
+                if pair.one.start <= pair.two.start && pair.one.end >= pair.two.start {
+                    overlapping_pairs += 1;
+                } else if pair.one.start >= pair.two.start && pair.one.start <= pair.two.end {
+                    overlapping_pairs += 1;
+                }
+            }
+        } else {
+            // only calc full overlap
+            for pair in pairs {
+                if pair.one.start <= pair.two.start && pair.one.end >= pair.two.end {
+                    overlapping_pairs += 1;
+                } else if pair.two.start <= pair.one.start && pair.two.end >= pair.one.end {
+                    overlapping_pairs += 1;
+                }
             }
         }
         return overlapping_pairs;
@@ -59,6 +70,6 @@ pub mod elf_cleanup {
 }
 
 fn main() {
-    let total_pairs = elf_cleanup::find_overlapping_pairs("input1.txt".to_string());
+    let total_pairs = elf_cleanup::find_overlapping_pairs("input1.txt".to_string(), true);
     println!("Pairs: {}", total_pairs);
 }

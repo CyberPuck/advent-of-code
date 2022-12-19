@@ -26,3 +26,37 @@ In this case 2 pairs fully overlap.
 ## Part One
 
 Find out how many elf pairs *fully* overlap.
+
+## Part Two
+
+Find out how many elf pairs **partially** overlap.
+
+### Scratch Pad for Logic
+
+#### Leading First Pair
+
+```BASH
+10---40---
+---20---50
+```
+
+> if 1 <= 2 start and 1 end >= 2 start
+
+This logic should work with a fully overlapping leading first pair:
+```BASH
+10-------50
+--12---45--
+```
+
+#### Trailing First Pair
+
+--20---50--
+10---30----
+
+> if 1 >= 2 start and 1 start <= 2 end
+
+This logic should work with a fully overlapping leading first pair:
+```BASH
+---12-----45---
+10-----------50
+```
