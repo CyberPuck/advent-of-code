@@ -9,8 +9,8 @@ pub mod crane_operation_plotter {
     impl Default for CraneConfig {
         fn default() -> Self {
             CraneConfig {
-                crates: vec![vec![Crate::default()]],
-                procedures: vec![CraneProcedure::default()],
+                crates: vec![vec![]],
+                procedures: vec![],
             }
         }
     }
@@ -26,6 +26,7 @@ pub mod crane_operation_plotter {
         }
     }
 
+    #[derive(Debug)]
     struct CraneProcedure {
         start_stack: u32,
         end_stack: u32,
@@ -49,7 +50,7 @@ pub mod crane_operation_plotter {
     }
 
     fn parse_file(file_name: String) -> CraneConfig {
-        let crane_config = CraneConfig::default();
+        let mut crane_config = CraneConfig::default();
         let file_data = fs::read_to_string(file_name).unwrap();
         let file_lines = file_data.lines();
         // First find the number of columns, generate crate config
@@ -57,17 +58,17 @@ pub mod crane_operation_plotter {
         // but I'm not confident this will hold muster to improper file input
         let mut crate_stacks: u32 = 0;
         let mut crate_config: Vec<String> = vec![];
+        let mut crane_procedure: Vec<String> = vec![];
         for line in file_lines {
             if line.trim().starts_with('1') {
                 let final_stack = line.trim().chars().rev().next().unwrap();
                 crate_stacks = final_stack.to_digit(10).unwrap();
-                break;
-            } else {
+            } else if !line.starts_with("move") {
                 crate_config.push(line.to_string());
+            } else {
+                crane_procedure.push(line.to_string());
             }
         }
-
-        println!("Number stacks: {}", crate_stacks);
 
         // Parse the intial crate config
         let mut initial_crates: Vec<Vec<Crate>> = vec![vec![]; crate_stacks as usize];
@@ -82,9 +83,29 @@ pub mod crane_operation_plotter {
                 stack_vec.push(new_crate);
             }
         }
-        println!("Test 1: {:?}", initial_crates);
+        crane_config.crates = initial_crates;
 
-        // Parse the instructions
+        // Parse the procedures
+        for line in crane_procedure {
+            if line.starts_with("move") {
+                let splits: Vec<_> = line.split_whitespace().collect();
+                let mut number_counter = 0;
+                let mut procedure: CraneProcedure = CraneProcedure::default();
+                for item in splits {
+                    if item.chars().next().unwrap().is_numeric() {
+                        if number_counter == 0 {
+                            procedure.number_of_crates = u32::from_str_radix(item, 10).unwrap();
+                        } else if number_counter == 1 {
+                            procedure.start_stack = u32::from_str_radix(item, 10).unwrap();
+                        } else if number_counter == 2 {
+                            procedure.end_stack = u32::from_str_radix(item, 10).unwrap();
+                        }
+                        number_counter += 1;
+                    }
+                }
+                crane_config.procedures.push(procedure);
+            }
+        }
 
         return crane_config;
     }
