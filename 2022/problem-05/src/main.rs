@@ -48,22 +48,21 @@ pub mod crane_operation_plotter {
         let mut crate_config = "".to_string();
         let mut crane_config = parse_file(file_name);
 
-        println!("Initial crate config: {:?}", crane_config.crates);
         // run through the crane procedures
         let mut counter = 1;
         for procedure in crane_config.procedures {
             let crates = &mut crane_config.crates;
-            for _n in [0..procedure.number_of_crates] {
+            for _n in 0..procedure.number_of_crates {
                 let moved_crate = crates[procedure.start_stack as usize].pop().unwrap();
                 crates[procedure.end_stack as usize].push(moved_crate);
             }
-            println!("Config {}: {:?}", counter, crane_config.crates);
+
             counter += 1;
         }
-        println!("Final config: {:?}", crane_config.crates);
+
         // build up final answer
         for row in crane_config.crates {
-            crate_config.push(row[0].name);
+            crate_config.push(row[row.len() - 1].name);
         }
 
         return crate_config;
@@ -103,8 +102,7 @@ pub mod crane_operation_plotter {
                 stack_vec.push(new_crate);
             }
         }
-        println!("Old setup: {:?}", initial_crates);
-        println!("Total vectors: {}", initial_crates.len());
+
         // flip crate vectors to match last in first out
         for n in 0..initial_crates.len() {
             initial_crates[n].reverse();
@@ -120,8 +118,9 @@ pub mod crane_operation_plotter {
                 for item in splits {
                     if item.chars().next().unwrap().is_numeric() {
                         // remember to subtract by 1 to match vector indexing
+                        // NOTE: Keep number_of_crates same to actually move crates
                         if number_counter == 0 {
-                            procedure.number_of_crates = u32::from_str_radix(item, 10).unwrap() - 1;
+                            procedure.number_of_crates = u32::from_str_radix(item, 10).unwrap();
                         } else if number_counter == 1 {
                             procedure.start_stack = u32::from_str_radix(item, 10).unwrap() - 1;
                         } else if number_counter == 2 {
@@ -139,6 +138,6 @@ pub mod crane_operation_plotter {
 }
 
 fn main() {
-    let final_config = crane_operation_plotter::get_final_crate_config("sample1.txt".to_string());
+    let final_config = crane_operation_plotter::get_final_crate_config("input1.txt".to_string());
     println!("Final config: {}", final_config);
 }
