@@ -70,8 +70,7 @@ pub mod crane_operation_plotter {
         println!("Number stacks: {}", crate_stacks);
 
         // Parse the intial crate config
-        let mut initial_crates: Vec<Vec<Crate>> =
-            vec![vec![Crate::default()]; crate_stacks as usize];
+        let mut initial_crates: Vec<Vec<Crate>> = vec![vec![]; crate_stacks as usize];
         for line in crate_config {
             let crate_entries: Vec<_> = line.match_indices("[").collect();
             for crate_tuple in crate_entries {
