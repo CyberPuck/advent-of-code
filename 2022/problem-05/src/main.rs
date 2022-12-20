@@ -1,6 +1,7 @@
 pub mod crane_operation_plotter {
     use std::fs;
 
+    #[derive(Debug)]
     struct CraneConfig {
         crates: Vec<Vec<Crate>>,
         procedures: Vec<CraneProcedure>,
@@ -26,7 +27,7 @@ pub mod crane_operation_plotter {
         }
     }
 
-    #[derive(Debug)]
+    #[derive(Debug, Copy, Clone)]
     struct CraneProcedure {
         start_stack: u32,
         end_stack: u32,
@@ -45,7 +46,18 @@ pub mod crane_operation_plotter {
 
     pub fn get_final_crate_config(file_name: String) -> String {
         let crate_config = "".to_string();
-        let _crane_config = parse_file(file_name);
+        let mut crane_config = parse_file(file_name);
+
+        // run through the crane procedures
+        for procedure in crane_config.procedures {
+            let crates = &mut crane_config.crates;
+            for _n in [0..procedure.number_of_crates] {
+                let moved_crate = crates[procedure.start_stack as usize].pop().unwrap();
+                crates[procedure.end_stack as usize].push(moved_crate);
+            }
+        }
+        println!("Final config: {:?}", crane_config.crates);
+
         return crate_config;
     }
 
@@ -93,12 +105,13 @@ pub mod crane_operation_plotter {
                 let mut procedure: CraneProcedure = CraneProcedure::default();
                 for item in splits {
                     if item.chars().next().unwrap().is_numeric() {
+                        // remember to subtract by 1 to match vector indexing
                         if number_counter == 0 {
-                            procedure.number_of_crates = u32::from_str_radix(item, 10).unwrap();
+                            procedure.number_of_crates = u32::from_str_radix(item, 10).unwrap() - 1;
                         } else if number_counter == 1 {
-                            procedure.start_stack = u32::from_str_radix(item, 10).unwrap();
+                            procedure.start_stack = u32::from_str_radix(item, 10).unwrap() - 1;
                         } else if number_counter == 2 {
-                            procedure.end_stack = u32::from_str_radix(item, 10).unwrap();
+                            procedure.end_stack = u32::from_str_radix(item, 10).unwrap() - 1;
                         }
                         number_counter += 1;
                     }
