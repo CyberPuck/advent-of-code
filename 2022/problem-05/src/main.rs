@@ -45,18 +45,26 @@ pub mod crane_operation_plotter {
     }
 
     pub fn get_final_crate_config(file_name: String) -> String {
-        let crate_config = "".to_string();
+        let mut crate_config = "".to_string();
         let mut crane_config = parse_file(file_name);
 
+        println!("Initial crate config: {:?}", crane_config.crates);
         // run through the crane procedures
+        let mut counter = 1;
         for procedure in crane_config.procedures {
             let crates = &mut crane_config.crates;
             for _n in [0..procedure.number_of_crates] {
                 let moved_crate = crates[procedure.start_stack as usize].pop().unwrap();
                 crates[procedure.end_stack as usize].push(moved_crate);
             }
+            println!("Config {}: {:?}", counter, crane_config.crates);
+            counter += 1;
         }
         println!("Final config: {:?}", crane_config.crates);
+        // build up final answer
+        for row in crane_config.crates {
+            crate_config.push(row[0].name);
+        }
 
         return crate_config;
     }
@@ -94,6 +102,12 @@ pub mod crane_operation_plotter {
                 let stack_vec = &mut initial_crates[stack_index];
                 stack_vec.push(new_crate);
             }
+        }
+        println!("Old setup: {:?}", initial_crates);
+        println!("Total vectors: {}", initial_crates.len());
+        // flip crate vectors to match last in first out
+        for n in 0..initial_crates.len() {
+            initial_crates[n].reverse();
         }
         crane_config.crates = initial_crates;
 
