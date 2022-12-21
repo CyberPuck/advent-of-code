@@ -1,7 +1,8 @@
 mod comm_protocol_decoder {
     use std::fs;
 
-    pub fn get_data_stream_start_index(file_name: String) -> u32 {
+    pub fn get_data_stream_start_index(file_name: String, user_message: bool) -> u32 {
+        let data_frame_size = if user_message { 13 } else { 3 };
         let data_string = parse_file(file_name);
         // find data string
         let mut data_frame: Vec<char> = vec![];
@@ -9,7 +10,7 @@ mod comm_protocol_decoder {
         let mut counter = 0;
         for data_packet in data_string.chars() {
             //println!("Counter: {}, Data buffer: {:?}", counter, data_frame);
-            if counter > 3 {
+            if counter > data_frame_size {
                 if !vec_has_repeats(&data_frame) {
                     return counter;
                 } else {
@@ -52,16 +53,22 @@ mod comm_protocol_decoder {
 }
 
 fn main() {
-    let start_index = comm_protocol_decoder::get_data_stream_start_index("sample1.txt".to_string());
+    let start_index =
+        comm_protocol_decoder::get_data_stream_start_index("sample1.txt".to_string(), true);
     println!("Data stream start is: {}", start_index);
-    let start_index = comm_protocol_decoder::get_data_stream_start_index("sample2.txt".to_string());
+    let start_index =
+        comm_protocol_decoder::get_data_stream_start_index("sample2.txt".to_string(), true);
     println!("Data stream start is: {}", start_index);
-    let start_index = comm_protocol_decoder::get_data_stream_start_index("sample3.txt".to_string());
+    let start_index =
+        comm_protocol_decoder::get_data_stream_start_index("sample3.txt".to_string(), true);
     println!("Data stream start is: {}", start_index);
-    let start_index = comm_protocol_decoder::get_data_stream_start_index("sample4.txt".to_string());
+    let start_index =
+        comm_protocol_decoder::get_data_stream_start_index("sample4.txt".to_string(), true);
     println!("Data stream start is: {}", start_index);
-    let start_index = comm_protocol_decoder::get_data_stream_start_index("sample5.txt".to_string());
+    let start_index =
+        comm_protocol_decoder::get_data_stream_start_index("sample5.txt".to_string(), true);
     println!("Data stream start is: {}", start_index);
-    let start_index = comm_protocol_decoder::get_data_stream_start_index("input1.txt".to_string());
+    let start_index =
+        comm_protocol_decoder::get_data_stream_start_index("input1.txt".to_string(), true);
     println!("Data stream start for input is: {}", start_index);
 }
