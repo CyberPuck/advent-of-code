@@ -44,20 +44,39 @@ pub mod crane_operation_plotter {
         }
     }
 
-    pub fn get_final_crate_config(file_name: String) -> String {
+    /// Given a crate file configuration, calculate the final crate configuration.
+    ///
+    /// ## Flag
+    ///
+    /// The `stack_move` flag (boolean) indicates if the crates are moved one
+    /// at a time during a given crane procedure (false), or if all crates are
+    /// moved at the same time (true).
+    pub fn get_final_crate_config(file_name: String, stack_move: bool) -> String {
         let mut crate_config = "".to_string();
         let mut crane_config = parse_file(file_name);
 
         // run through the crane procedures
-        let mut counter = 1;
-        for procedure in crane_config.procedures {
-            let crates = &mut crane_config.crates;
-            for _n in 0..procedure.number_of_crates {
-                let moved_crate = crates[procedure.start_stack as usize].pop().unwrap();
-                crates[procedure.end_stack as usize].push(moved_crate);
+        if !stack_move {
+            // each crate moved one at a time
+            for procedure in crane_config.procedures {
+                let crates = &mut crane_config.crates;
+                for _n in 0..procedure.number_of_crates {
+                    let moved_crate = crates[procedure.start_stack as usize].pop().unwrap();
+                    crates[procedure.end_stack as usize].push(moved_crate);
+                }
             }
-
-            counter += 1;
+        } else {
+            // crates are stack moved, simulating by starting at an offset
+            // index in the starting vector
+            for procedure in crane_config.procedures {
+                let crates = &mut crane_config.crates;
+                for n in (0..procedure.number_of_crates).rev() {
+                    let start_stack_length = crates[procedure.start_stack as usize].len() - 1;
+                    let moved_crate = crates[procedure.start_stack as usize]
+                        .remove(start_stack_length - n as usize);
+                    crates[procedure.end_stack as usize].push(moved_crate);
+                }
+            }
         }
 
         // build up final answer
@@ -138,6 +157,7 @@ pub mod crane_operation_plotter {
 }
 
 fn main() {
-    let final_config = crane_operation_plotter::get_final_crate_config("input1.txt".to_string());
+    let final_config =
+        crane_operation_plotter::get_final_crate_config("input1.txt".to_string(), true);
     println!("Final config: {}", final_config);
 }

@@ -43,3 +43,13 @@ Final top config is `CMZ`.
 Once the procedure has been run through give the *top* crate order.
 
 In the above sample it is `CMZ`
+
+## Part Two
+
+CoPs move all crates of a given stack at the same time and in the same order.
+
+### Sample Results
+
+This means that the end result from `sample1.txt` now reports:
+
+> MCD
