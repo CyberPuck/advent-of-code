@@ -11,9 +11,9 @@ differently from the rope head.
 
 - Tail (T) must always be touching the Head (H)
 - Touching involves:
-    - Overrlapping (head on top of tail)
+    - Overlapping (head on top of tail)
     - Adjacent (both orthogonal and diagonal)
-- If the head is ever two steps orthogonal to the tail, the tail must move in that direction
+- If the head is ever two spaces orthogonal to the tail, the tail must move in that direction
 - If the head and tail are not touching and are not in the same row and column, the tail moves diagonally
 
 ### Sample
