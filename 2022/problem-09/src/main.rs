@@ -3,7 +3,7 @@ mod tail_simulator {
 
     #[derive(Debug)]
     /// NOTE: Assuming origin (starting point) is (0,0)
-    struct Simulator {
+    pub struct Simulator {
         head: Point,
         tail: Point,
         tail_steps: u32,
@@ -14,10 +14,10 @@ mod tail_simulator {
         fn update_rope(&mut self, direction: Direction) {
             // update head position
             match direction {
-                Direction::UP => self.head.x += 1,
-                Direction::DOWN => self.head.x -= 1,
-                Direction::RIGHT => self.head.y += 1,
-                Direction::LEFT => self.head.y -= 1,
+                Direction::UP => self.head.y += 1,
+                Direction::DOWN => self.head.y -= 1,
+                Direction::RIGHT => self.head.x += 1,
+                Direction::LEFT => self.head.x -= 1,
             }
 
             // update tail position
@@ -48,7 +48,7 @@ mod tail_simulator {
 
     #[derive(Debug)]
     /// NOTE: Assuming there are no negative coordinates
-    struct Point {
+    pub struct Point {
         x: i32,
         y: i32,
     }
@@ -88,7 +88,7 @@ mod tail_simulator {
     fn parse_file(filename: String) -> (Simulator, Vec<Move>) {
         let file = fs::read_to_string(filename).unwrap();
         let lines = file.lines();
-        let mut simulator = Simulator {
+        let simulator = Simulator {
             head: Point { x: 0, y: 0 },
             tail: Point { x: 0, y: 0 },
             tail_steps: 0,
@@ -117,6 +117,70 @@ mod tail_simulator {
             }
         }
         return simulator.tail_steps;
+    }
+
+    #[cfg(test)]
+    mod tests {
+        use crate::tail_simulator::Point;
+
+        use super::*;
+
+        #[test]
+        fn test_lateral_move() {
+            let mut sim = Simulator {
+                head: Point { x: 2, y: 1 },
+                tail: Point { x: 1, y: 1 },
+                tail_steps: 0,
+            };
+
+            sim.update_rope(Direction::RIGHT);
+
+            assert_eq!(sim.tail.x, 2, "Tail did not move");
+            assert_eq!(sim.tail.y, 1, "Tail moved incorrectly");
+            assert_eq!(sim.tail_steps, 1, "Step number is incorrect");
+        }
+
+        #[test]
+        fn test_vertical_move() {
+            let mut sim = Simulator {
+                head: Point { x: 1, y: 2 },
+                tail: Point { x: 1, y: 3 },
+                tail_steps: 0,
+            };
+
+            sim.update_rope(Direction::DOWN);
+
+            assert_eq!(sim.tail.y, 2, "Tail did not move");
+            assert_eq!(sim.tail.x, 1, "Tail moved incorrectly");
+            assert_eq!(sim.tail_steps, 1, "Step number is incorrect");
+        }
+
+        #[test]
+        fn test_diagonal_moves() {
+            let mut sim = Simulator {
+                head: Point { x: 2, y: 2 },
+                tail: Point { x: 1, y: 1 },
+                tail_steps: 0,
+            };
+
+            sim.update_rope(Direction::UP);
+
+            assert_eq!(sim.tail.x, 2, "Tail-1 x moved incorrectly");
+            assert_eq!(sim.tail.y, 2, "Tail-1 y moved incorrectly");
+            assert_eq!(sim.tail_steps, 1, "Step number is incorrect");
+
+            let mut sim = Simulator {
+                head: Point { x: 2, y: 2 },
+                tail: Point { x: 1, y: 1 },
+                tail_steps: 0,
+            };
+
+            sim.update_rope(Direction::RIGHT);
+
+            assert_eq!(sim.tail.x, 2, "Tail-2 x moved incorrectly");
+            assert_eq!(sim.tail.y, 2, "Tail-2 y moved incorrectly");
+            assert_eq!(sim.tail_steps, 1, "Step number is incorrect");
+        }
     }
 }
 
