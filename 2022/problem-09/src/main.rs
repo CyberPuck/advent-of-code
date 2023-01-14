@@ -20,6 +20,11 @@ mod tail_simulator {
                 Direction::LEFT => self.head.x -= 1,
             }
 
+            // TODO: I should just make a constructor to add the tail origin
+            if self.tail.x == 0 && self.tail.y == 0 && self.tail_map.keys().len() == 0 {
+                self.tail_map.insert(self.tail, 1);
+            }
+
             // update tail position
             let y_diff: i32 = self.head.y - self.tail.y;
             let x_diff: i32 = self.head.x - self.tail.x;
@@ -28,11 +33,13 @@ mod tail_simulator {
                 self.tail_map.entry(self.tail).or_insert(0);
                 self.tail_map
                     .insert(self.tail, self.tail_map.get(&self.tail).unwrap() + 1);
+                println!("++Moved to: {:?}", self.tail);
             } else if self.head.y == self.tail.y && x_diff.abs() > 1 {
                 self.tail.x += x_diff / x_diff.abs();
                 self.tail_map.entry(self.tail).or_insert(0);
                 self.tail_map
                     .insert(self.tail, self.tail_map.get(&self.tail).unwrap() + 1);
+                println!("++Moved to: {:?}", self.tail);
             } else if self.head.x != self.tail.x
                 && self.head.y != self.tail.y
                 && (y_diff.abs() > 1 || x_diff.abs() > 1)
@@ -43,15 +50,17 @@ mod tail_simulator {
                 self.tail_map.entry(self.tail).or_insert(0);
                 self.tail_map
                     .insert(self.tail, self.tail_map.get(&self.tail).unwrap() + 1);
+                println!("++Moved to: {:?}", self.tail);
             } else {
                 println!(
-                    "Should not move.\nHead: {:?}\nTail: {:?}",
+                    "--Should not move.\nHead: {:?}\nTail: {:?}",
                     self.head, self.tail,
                 );
             }
         }
 
         fn get_tail_count(&self) -> u32 {
+            println!("Map is: {:?}", self.tail_map);
             return self.tail_map.keys().len() as u32;
         }
     }
