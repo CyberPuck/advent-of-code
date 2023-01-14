@@ -1,10 +1,11 @@
 mod tail_simulator {
-    use std::{collections::HashMap, fs, iter::Map};
+    use std::{collections::HashMap, fs};
 
     #[derive(Debug)]
     /// NOTE: Assuming origin (starting point) is (0,0)
     pub struct Simulator {
         head: Point,
+        body_knots: [Point; 8],
         tail: Point,
         tail_map: HashMap<Point, u32>,
     }
@@ -25,38 +26,54 @@ mod tail_simulator {
                 self.tail_map.insert(self.tail, 1);
             }
 
+            // update all body knots
+            for body_knot_index in 0..self.body_knots.len() {
+                let check_point = if body_knot_index == 0 {
+                    self.head
+                } else {
+                    self.body_knots[body_knot_index - 1]
+                };
+                self.body_knots[body_knot_index] = self
+                    .update_knot_position(self.body_knots[body_knot_index], check_point)
+                    .0;
+            }
+
+            // update the tail
+            let tail_results =
+                self.update_knot_position(self.tail, self.body_knots[self.body_knots.len() - 1]);
+            if tail_results.1 {
+                self.tail_map.entry(tail_results.0).or_insert(0);
+                self.tail_map.insert(
+                    tail_results.0,
+                    self.tail_map.get(&tail_results.0).unwrap() + 1,
+                );
+            }
+        }
+
+        fn update_knot_position(
+            &self,
+            mut current_knot: Point,
+            previous_knot: Point,
+        ) -> (Point, bool) {
+            let mut updated = true;
             // update tail position
-            let y_diff: i32 = self.head.y - self.tail.y;
-            let x_diff: i32 = self.head.x - self.tail.x;
-            if self.head.x == self.tail.x && y_diff.abs() > 1 {
-                self.tail.y += y_diff / y_diff.abs();
-                self.tail_map.entry(self.tail).or_insert(0);
-                self.tail_map
-                    .insert(self.tail, self.tail_map.get(&self.tail).unwrap() + 1);
-                println!("++Moved to: {:?}", self.tail);
-            } else if self.head.y == self.tail.y && x_diff.abs() > 1 {
-                self.tail.x += x_diff / x_diff.abs();
-                self.tail_map.entry(self.tail).or_insert(0);
-                self.tail_map
-                    .insert(self.tail, self.tail_map.get(&self.tail).unwrap() + 1);
-                println!("++Moved to: {:?}", self.tail);
-            } else if self.head.x != self.tail.x
-                && self.head.y != self.tail.y
+            let y_diff: i32 = previous_knot.y - current_knot.y;
+            let x_diff: i32 = previous_knot.x - current_knot.x;
+            if previous_knot.x == current_knot.x && y_diff.abs() > 1 {
+                current_knot.y += y_diff / y_diff.abs();
+            } else if previous_knot.y == current_knot.y && x_diff.abs() > 1 {
+                current_knot.x += x_diff / x_diff.abs();
+            } else if previous_knot.x != current_knot.x
+                && previous_knot.y != current_knot.y
                 && (y_diff.abs() > 1 || x_diff.abs() > 1)
             {
                 // diagonal update (update tail X, Y)
-                self.tail.x += x_diff / x_diff.abs();
-                self.tail.y += y_diff / y_diff.abs();
-                self.tail_map.entry(self.tail).or_insert(0);
-                self.tail_map
-                    .insert(self.tail, self.tail_map.get(&self.tail).unwrap() + 1);
-                println!("++Moved to: {:?}", self.tail);
+                current_knot.x += x_diff / x_diff.abs();
+                current_knot.y += y_diff / y_diff.abs();
             } else {
-                println!(
-                    "--Should not move.\nHead: {:?}\nTail: {:?}",
-                    self.head, self.tail,
-                );
+                updated = false;
             }
+            return (current_knot, updated);
         }
 
         fn get_tail_count(&self) -> u32 {
@@ -109,6 +126,7 @@ mod tail_simulator {
         let lines = file.lines();
         let simulator = Simulator {
             head: Point { x: 0, y: 0 },
+            body_knots: [Point { x: 0, y: 0 }; 8],
             tail: Point { x: 0, y: 0 },
             tail_map: HashMap::new(),
         };
@@ -148,6 +166,7 @@ mod tail_simulator {
         fn test_lateral_move() {
             let mut sim = Simulator {
                 head: Point { x: 2, y: 1 },
+                body_knots: [Point { x: 0, y: 0 }; 8],
                 tail: Point { x: 1, y: 1 },
                 tail_map: HashMap::new(),
             };
@@ -163,6 +182,7 @@ mod tail_simulator {
         fn test_vertical_move() {
             let mut sim = Simulator {
                 head: Point { x: 1, y: 2 },
+                body_knots: [Point { x: 0, y: 0 }; 8],
                 tail: Point { x: 1, y: 3 },
                 tail_map: HashMap::new(),
             };
@@ -178,6 +198,7 @@ mod tail_simulator {
         fn test_diagonal_moves() {
             let mut sim = Simulator {
                 head: Point { x: 2, y: 2 },
+                body_knots: [Point { x: 0, y: 0 }; 8],
                 tail: Point { x: 1, y: 1 },
                 tail_map: HashMap::new(),
             };
@@ -190,6 +211,7 @@ mod tail_simulator {
 
             let mut sim = Simulator {
                 head: Point { x: 2, y: 2 },
+                body_knots: [Point { x: 0, y: 0 }; 8],
                 tail: Point { x: 1, y: 1 },
                 tail_map: HashMap::new(),
             };
