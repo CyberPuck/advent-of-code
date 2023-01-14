@@ -226,6 +226,6 @@ mod tail_simulator {
 }
 
 fn main() {
-    let steps = tail_simulator::get_rope_moves("input1.txt".to_string());
+    let steps = tail_simulator::get_rope_moves("sample2.txt".to_string());
     println!("Number of steps: {}", steps);
 }
