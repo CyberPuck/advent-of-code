@@ -1,12 +1,12 @@
 mod tail_simulator {
-    use std::fs;
+    use std::{collections::HashMap, fs, iter::Map};
 
     #[derive(Debug)]
     /// NOTE: Assuming origin (starting point) is (0,0)
     pub struct Simulator {
         head: Point,
         tail: Point,
-        tail_steps: u32,
+        tail_map: HashMap<Point, u32>,
     }
 
     impl Simulator {
@@ -25,10 +25,14 @@ mod tail_simulator {
             let x_diff: i32 = self.head.x - self.tail.x;
             if self.head.x == self.tail.x && y_diff.abs() > 1 {
                 self.tail.y += y_diff / y_diff.abs();
-                self.tail_steps += 1;
+                self.tail_map.entry(self.tail).or_insert(0);
+                self.tail_map
+                    .insert(self.tail, self.tail_map.get(&self.tail).unwrap() + 1);
             } else if self.head.y == self.tail.y && x_diff.abs() > 1 {
                 self.tail.x += x_diff / x_diff.abs();
-                self.tail_steps += 1;
+                self.tail_map.entry(self.tail).or_insert(0);
+                self.tail_map
+                    .insert(self.tail, self.tail_map.get(&self.tail).unwrap() + 1);
             } else if self.head.x != self.tail.x
                 && self.head.y != self.tail.y
                 && (y_diff.abs() > 1 || x_diff.abs() > 1)
@@ -36,7 +40,9 @@ mod tail_simulator {
                 // diagonal update (update tail X, Y)
                 self.tail.x += x_diff / x_diff.abs();
                 self.tail.y += y_diff / y_diff.abs();
-                self.tail_steps += 1;
+                self.tail_map.entry(self.tail).or_insert(0);
+                self.tail_map
+                    .insert(self.tail, self.tail_map.get(&self.tail).unwrap() + 1);
             } else {
                 println!(
                     "Should not move.\nHead: {:?}\nTail: {:?}",
@@ -44,9 +50,13 @@ mod tail_simulator {
                 );
             }
         }
+
+        fn get_tail_count(&self) -> u32 {
+            return self.tail_map.keys().len() as u32;
+        }
     }
 
-    #[derive(Debug)]
+    #[derive(Debug, Eq, Hash, PartialEq, Copy, Clone)]
     /// NOTE: Assuming there are no negative coordinates
     pub struct Point {
         x: i32,
@@ -91,7 +101,7 @@ mod tail_simulator {
         let simulator = Simulator {
             head: Point { x: 0, y: 0 },
             tail: Point { x: 0, y: 0 },
-            tail_steps: 0,
+            tail_map: HashMap::new(),
         };
         let mut moves: Vec<Move> = vec![];
         for line in lines {
@@ -116,7 +126,7 @@ mod tail_simulator {
                 simulator.update_rope(head_move.direction);
             }
         }
-        return simulator.tail_steps;
+        return simulator.get_tail_count();
     }
 
     #[cfg(test)]
@@ -130,14 +140,14 @@ mod tail_simulator {
             let mut sim = Simulator {
                 head: Point { x: 2, y: 1 },
                 tail: Point { x: 1, y: 1 },
-                tail_steps: 0,
+                tail_map: HashMap::new(),
             };
 
             sim.update_rope(Direction::RIGHT);
 
             assert_eq!(sim.tail.x, 2, "Tail did not move");
             assert_eq!(sim.tail.y, 1, "Tail moved incorrectly");
-            assert_eq!(sim.tail_steps, 1, "Step number is incorrect");
+            assert_eq!(sim.get_tail_count(), 1, "Step number is incorrect");
         }
 
         #[test]
@@ -145,14 +155,14 @@ mod tail_simulator {
             let mut sim = Simulator {
                 head: Point { x: 1, y: 2 },
                 tail: Point { x: 1, y: 3 },
-                tail_steps: 0,
+                tail_map: HashMap::new(),
             };
 
             sim.update_rope(Direction::DOWN);
 
             assert_eq!(sim.tail.y, 2, "Tail did not move");
             assert_eq!(sim.tail.x, 1, "Tail moved incorrectly");
-            assert_eq!(sim.tail_steps, 1, "Step number is incorrect");
+            assert_eq!(sim.get_tail_count(), 1, "Step number is incorrect");
         }
 
         #[test]
@@ -160,26 +170,26 @@ mod tail_simulator {
             let mut sim = Simulator {
                 head: Point { x: 2, y: 2 },
                 tail: Point { x: 1, y: 1 },
-                tail_steps: 0,
+                tail_map: HashMap::new(),
             };
 
             sim.update_rope(Direction::UP);
 
             assert_eq!(sim.tail.x, 2, "Tail-1 x moved incorrectly");
             assert_eq!(sim.tail.y, 2, "Tail-1 y moved incorrectly");
-            assert_eq!(sim.tail_steps, 1, "Step number is incorrect");
+            assert_eq!(sim.get_tail_count(), 1, "Step number is incorrect");
 
             let mut sim = Simulator {
                 head: Point { x: 2, y: 2 },
                 tail: Point { x: 1, y: 1 },
-                tail_steps: 0,
+                tail_map: HashMap::new(),
             };
 
             sim.update_rope(Direction::RIGHT);
 
             assert_eq!(sim.tail.x, 2, "Tail-2 x moved incorrectly");
             assert_eq!(sim.tail.y, 2, "Tail-2 y moved incorrectly");
-            assert_eq!(sim.tail_steps, 1, "Step number is incorrect");
+            assert_eq!(sim.get_tail_count(), 1, "Step number is incorrect");
         }
     }
 }
