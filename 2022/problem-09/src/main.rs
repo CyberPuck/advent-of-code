@@ -28,6 +28,7 @@ mod tail_simulator {
 
             // update all body knots
             for body_knot_index in 0..self.body_knots.len() {
+                // index 0 always checks with the head_knot
                 let check_point = if body_knot_index == 0 {
                     self.head
                 } else {
@@ -42,6 +43,7 @@ mod tail_simulator {
             let tail_results =
                 self.update_knot_position(self.tail, self.body_knots[self.body_knots.len() - 1]);
             if tail_results.1 {
+                self.tail = tail_results.0;
                 self.tail_map.entry(tail_results.0).or_insert(0);
                 self.tail_map.insert(
                     tail_results.0,
@@ -50,6 +52,10 @@ mod tail_simulator {
             }
         }
 
+        /// Given a knot being followed, update our knot if we need to.
+        /// ### Returns
+        /// Point, current knot and the position it should be at
+        /// Bool, indicates if the point returned has changed
         fn update_knot_position(
             &self,
             mut current_knot: Point,
@@ -226,6 +232,6 @@ mod tail_simulator {
 }
 
 fn main() {
-    let steps = tail_simulator::get_rope_moves("sample2.txt".to_string());
+    let steps = tail_simulator::get_rope_moves("input1.txt".to_string());
     println!("Number of steps: {}", steps);
 }
