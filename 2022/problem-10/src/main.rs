@@ -9,6 +9,7 @@ mod cpu_simulator {
     pub fn get_register_value(file_name: String) -> i32 {
         let instructions = parse_file(file_name);
         let cpu_cycles = simulate_cpu_ops(instructions);
+        draw_incoming_image(&cpu_cycles);
         let register_x = calculate_register_x_value(cpu_cycles);
 
         return register_x;
@@ -53,14 +54,31 @@ mod cpu_simulator {
         return cpu_cycles;
     }
 
+    fn draw_incoming_image(register_values: &Vec<i32>) {
+        let mut draw_buffer: String = "".to_string();
+        println!("Display is:");
+        for register_x_index in 1..register_values.len() {
+            let cursor_position = (register_x_index - 1) % 40;
+            let diff: f32 = register_values[register_x_index] as f32 - cursor_position as f32;
+            if diff >= -1.0 && diff <= 1.0 {
+                draw_buffer.push('#');
+            } else {
+                draw_buffer.push('.');
+            }
+            
+            if register_x_index % 40 == 0 {
+                println!("{}", draw_buffer);
+                draw_buffer = "".to_string();
+            }
+        }
+    }
+
     fn calculate_register_x_value(cpu_cycles: Vec<i32>) -> i32 {
         let mut register_x = 0;
         for cycle_index in 0..cpu_cycles.len() {
             if (cycle_index + 20) % 40 == 0 {
-                println!("Cycle: {}\nOld X = {}\nCurrent Value = {}", cycle_index, register_x, cpu_cycles.get(cycle_index).unwrap());
                 let update_value = i32::try_from(cycle_index).unwrap() * cpu_cycles.get(cycle_index).unwrap();
                 register_x = register_x + update_value;
-                println!("Adding = {}\nNew X = {}", update_value, register_x);
             }
         }
         return register_x;
