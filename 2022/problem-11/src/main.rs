@@ -1,6 +1,7 @@
 mod monkey_business {
     use std::fs;
 
+    #[derive(Debug)]
     struct Monkey {
         items: Vec<i32>,
         operation: Operation,
@@ -11,6 +12,7 @@ mod monkey_business {
     }
 
     /// ## NOTE: if `integer` == 0, it refers to the item value.
+    #[derive(Debug)]
     enum Operation {
         ADD { integer: i32 },
         MULTIPLE { integer: i32 },
@@ -88,6 +90,7 @@ mod monkey_business {
                 monkeys[monkey_index].test_divisor = test_divisor;
             } else if line.to_ascii_lowercase().contains("true") {
                 let test_str = line.split_ascii_whitespace().collect::<Vec<&str>>();
+                println!("TRue test: {:?}", test_str);
                 let test_true_monkey = test_str
                     .get(test_str.len() - 1)
                     .unwrap()
@@ -96,12 +99,14 @@ mod monkey_business {
                 monkeys[monkey_index].test_true_monkey = test_true_monkey;
             } else if line.to_ascii_lowercase().contains("false") {
                 let test_str = line.split_ascii_whitespace().collect::<Vec<&str>>();
-                let test_true_monkey = test_str
+                println!("false test: {:?}", test_str);
+                let test_false_monkey = test_str
                     .get(test_str.len() - 1)
                     .unwrap()
                     .parse::<usize>()
                     .unwrap();
-                monkeys[monkey_index].test_true_monkey = test_true_monkey;
+                println!("False monkey = {}", test_false_monkey);
+                monkeys[monkey_index].test_false_monkey = test_false_monkey;
             } else {
                 println!("The following line was not parsed = {}", line);
             }
@@ -111,13 +116,20 @@ mod monkey_business {
     }
 
     fn simulate_monkey_business(mut monkeys: Vec<Monkey>, round_count: u32) -> u32 {
+        println!("Monkeys: {:?}", monkeys);
         for _round in 0..round_count {
             for monkey_index in 0..monkeys.len() {
                 for item_index in 0..monkeys[monkey_index].items.len() {
                     let item_worry_level = monkeys[monkey_index].items[item_index];
                     let item_worry_increase = match monkeys[monkey_index].operation {
                         Operation::ADD { integer } => item_worry_level + integer,
-                        Operation::MULTIPLE { integer } => item_worry_level * integer,
+                        Operation::MULTIPLE { integer } => {
+                            if integer == 0 {
+                                item_worry_level * item_worry_level
+                            } else {
+                                item_worry_level * integer
+                            }
+                        }
                     };
                     let worry_level: i32 = f32::floor(item_worry_increase as f32 / 3.0) as i32;
                     if worry_level % monkeys[monkey_index].test_divisor == 0 {
