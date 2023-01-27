@@ -3,7 +3,7 @@ mod monkey_business {
 
     #[derive(Debug)]
     struct Monkey {
-        items: Vec<i32>,
+        items: Vec<f64>,
         operation: Operation,
         test_divisor: i32,
         test_true_monkey: usize,
@@ -20,7 +20,12 @@ mod monkey_business {
 
     pub fn get_monkey_business(file_name: String) -> u32 {
         let monkeys: Vec<Monkey> = parse_file(file_name);
-        return simulate_monkey_business(monkeys, 20);
+        let part2 = true;
+        if !part2 {
+            return simulate_monkey_business(monkeys, 20, part2);
+        } else {
+            return simulate_monkey_business(monkeys, 10000, part2);
+        }
     }
 
     fn parse_file(file_name: String) -> Vec<Monkey> {
@@ -50,7 +55,7 @@ mod monkey_business {
                 let items_list: Vec<&str> =
                     items.get(items.len() - 1).unwrap().split(",").collect();
                 for item_str in items_list {
-                    let item = item_str.trim().parse::<i32>().unwrap();
+                    let item = item_str.trim().parse::<f64>().unwrap();
                     monkeys[monkey_index].items.push(item);
                 }
             } else if line.to_ascii_lowercase().contains("operation") {
@@ -104,24 +109,29 @@ mod monkey_business {
         return monkeys;
     }
 
-    fn simulate_monkey_business(mut monkeys: Vec<Monkey>, round_count: u32) -> u32 {
+    fn simulate_monkey_business(mut monkeys: Vec<Monkey>, round_count: u32, part2: bool) -> u32 {
         //println!("Monkeys: {:?}", monkeys);
         for _round in 0..round_count {
+            println!("Round {}", _round);
             for monkey_index in 0..monkeys.len() {
                 for item_index in 0..monkeys[monkey_index].items.len() {
                     let item_worry_level = monkeys[monkey_index].items[item_index];
                     let item_worry_increase = match monkeys[monkey_index].operation {
-                        Operation::ADD { integer } => item_worry_level + integer,
+                        Operation::ADD { integer } => item_worry_level + integer as f64,
                         Operation::MULTIPLE { integer } => {
                             if integer == 0 {
                                 item_worry_level * item_worry_level
                             } else {
-                                item_worry_level * integer
+                                item_worry_level * integer as f64
                             }
                         }
                     };
-                    let worry_level: i32 = f32::floor(item_worry_increase as f32 / 3.0) as i32;
-                    if worry_level % monkeys[monkey_index].test_divisor == 0 {
+                    let worry_level: f64 = if !part2 {
+                        f32::floor(item_worry_increase as f32 / 3.0) as f64
+                    } else {
+                        item_worry_increase
+                    };
+                    if worry_level % monkeys[monkey_index].test_divisor as f64 == 0.0 {
                         //let item = monkeys[monkey_index].items[item_index];
                         let tossed_monkey_index = monkeys[monkey_index].test_true_monkey;
                         monkeys[tossed_monkey_index].items.push(worry_level);
@@ -156,6 +166,6 @@ mod monkey_business {
 }
 
 fn main() {
-    let monkey_business_value = monkey_business::get_monkey_business("input1.txt".to_string());
+    let monkey_business_value = monkey_business::get_monkey_business("sample1.txt".to_string());
     println!("Monkey business = {}", monkey_business_value);
 }

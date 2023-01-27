@@ -25,3 +25,12 @@ Monkey 3 inspected items 105 times.
 ```
 
 Answer is 101 * 105 = 10605
+
+## Part 2 - Everything Got Bigger
+
+Now we need to calculate 10000 rounds and the item worry levels are no longer
+divided by 3.
+
+### Sample1 - Results
+
+The answer to sample1.txt for part 2 is: 2713310158
