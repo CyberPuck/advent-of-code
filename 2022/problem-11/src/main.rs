@@ -35,9 +35,7 @@ mod monkey_business {
             // Note three different lines contain `monkey`, only the first line is uppercase
             if line.contains("Monkey") {
                 let number_str = line.split_ascii_whitespace().collect::<Vec<&str>>()[1];
-                println!("numbers are: {:?}", number_str);
                 let number = number_str.split(":").collect::<Vec<&str>>()[0];
-                println!("New index is: {}", number);
                 monkey_index = number.parse::<usize>().unwrap();
                 monkeys.push(Monkey {
                     items: Vec::new(),
@@ -48,17 +46,11 @@ mod monkey_business {
                     inspection_count: 0,
                 });
             } else if line.to_ascii_lowercase().contains("items") {
-                println!("Parsing items:");
                 let items: Vec<&str> = line.split(":").collect();
-                println!("Should be vec with 2 entries: {:?}", items);
                 let items_list: Vec<&str> =
                     items.get(items.len() - 1).unwrap().split(",").collect();
-                println!("Item list: {:?}", items_list);
                 for item_str in items_list {
-                    println!("Item is: {}", item_str.trim());
-                    println!("Item is: {}", item_str.trim().parse::<i32>().unwrap());
                     let item = item_str.trim().parse::<i32>().unwrap();
-                    println!("Number is: {}", item);
                     monkeys[monkey_index].items.push(item);
                 }
             } else if line.to_ascii_lowercase().contains("operation") {
@@ -90,7 +82,6 @@ mod monkey_business {
                 monkeys[monkey_index].test_divisor = test_divisor;
             } else if line.to_ascii_lowercase().contains("true") {
                 let test_str = line.split_ascii_whitespace().collect::<Vec<&str>>();
-                println!("TRue test: {:?}", test_str);
                 let test_true_monkey = test_str
                     .get(test_str.len() - 1)
                     .unwrap()
@@ -99,15 +90,13 @@ mod monkey_business {
                 monkeys[monkey_index].test_true_monkey = test_true_monkey;
             } else if line.to_ascii_lowercase().contains("false") {
                 let test_str = line.split_ascii_whitespace().collect::<Vec<&str>>();
-                println!("false test: {:?}", test_str);
                 let test_false_monkey = test_str
                     .get(test_str.len() - 1)
                     .unwrap()
                     .parse::<usize>()
                     .unwrap();
-                println!("False monkey = {}", test_false_monkey);
                 monkeys[monkey_index].test_false_monkey = test_false_monkey;
-            } else {
+            } else if !line.is_empty() {
                 println!("The following line was not parsed = {}", line);
             }
         }
@@ -116,7 +105,7 @@ mod monkey_business {
     }
 
     fn simulate_monkey_business(mut monkeys: Vec<Monkey>, round_count: u32) -> u32 {
-        println!("Monkeys: {:?}", monkeys);
+        //println!("Monkeys: {:?}", monkeys);
         for _round in 0..round_count {
             for monkey_index in 0..monkeys.len() {
                 for item_index in 0..monkeys[monkey_index].items.len() {
@@ -133,23 +122,28 @@ mod monkey_business {
                     };
                     let worry_level: i32 = f32::floor(item_worry_increase as f32 / 3.0) as i32;
                     if worry_level % monkeys[monkey_index].test_divisor == 0 {
-                        let item = monkeys[monkey_index].items[item_index];
+                        //let item = monkeys[monkey_index].items[item_index];
                         let tossed_monkey_index = monkeys[monkey_index].test_true_monkey;
-                        monkeys[tossed_monkey_index].items.push(item);
+                        monkeys[tossed_monkey_index].items.push(worry_level);
                     } else {
-                        let item = monkeys[monkey_index].items[item_index];
+                        //let item = monkeys[monkey_index].items[item_index];
                         let tossed_monkey_index = monkeys[monkey_index].test_false_monkey;
-                        monkeys[tossed_monkey_index].items.push(item);
+                        monkeys[tossed_monkey_index].items.push(worry_level);
                     }
                     monkeys[monkey_index].inspection_count =
                         monkeys[monkey_index].inspection_count + 1;
                 }
+                // clear out the items in the monkey (no longer there)
+                monkeys[monkey_index].items.clear();
             }
         }
+        println!("End monkeys = {:?}", monkeys);
         let mut first_monkey_inspector = 0;
         let mut second_monkey_inspector = 0;
         for monkey in monkeys {
             if monkey.inspection_count > first_monkey_inspector {
+                // Make sure to move current first place to second
+                second_monkey_inspector = first_monkey_inspector;
                 first_monkey_inspector = monkey.inspection_count;
             } else if monkey.inspection_count > second_monkey_inspector {
                 second_monkey_inspector = monkey.inspection_count;
@@ -162,6 +156,6 @@ mod monkey_business {
 }
 
 fn main() {
-    let monkey_business_value = monkey_business::get_monkey_business("sample1.txt".to_string());
+    let monkey_business_value = monkey_business::get_monkey_business("input1.txt".to_string());
     println!("Monkey business = {}", monkey_business_value);
 }

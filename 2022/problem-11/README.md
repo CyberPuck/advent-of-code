@@ -6,6 +6,8 @@ Each item a monkey stole has an associated worry level.
 
 > The worry level is divided by *3* then that the floor to the nearest integer.
 
+That new worry leveled item is thrown to the corresponding monkey.
+
 ## Part 1 - Calculated Monkey Business
 
 Given 20 rounds, which two monkeys inspected the most items.
