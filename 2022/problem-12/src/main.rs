@@ -19,6 +19,8 @@ mod hill_climber {
     impl fmt::Display for Map {
         fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
             let mut line_data: String = "".to_string();
+            line_data.push_str(format!("Starting point = {}\n", self.starting_point).as_str());
+            line_data.push_str(format!("Ending point = {}\n", self.ending_point).as_str());
             for y_index in 0..self.map_data.len() {
                 for x_index in 0..self.map_data[y_index].len() {
                     line_data.push(self.map_data[y_index][x_index]);
@@ -33,6 +35,12 @@ mod hill_climber {
     struct Point {
         x: u32,
         y: u32,
+    }
+
+    impl fmt::Display for Point {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            write!(f, "({}, {})", self.x, self.y)
+        }
     }
 
     pub fn find_shortest_path(file_name: String) -> u32 {
