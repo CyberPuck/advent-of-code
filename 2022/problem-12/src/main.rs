@@ -9,21 +9,52 @@ mod hill_climber {
     }
 
     impl Map {
-        fn find_shortest_path(&self, starting_point: &Point, mut count: u32) -> u32 {
-            let next_step = self.next_step(starting_point);
-            println!("At {}, finding: {}", starting_point, next_step);
+        /// Function for finding the shortest path, currently implemented in
+        /// Depth First Search.  It is *not* recursive, doing it iteratively.
+        fn find_shortest_path(&self) -> u32 {
+            println!("Starting search...");
 
-            let next_neighbors = self.get_neighbors(starting_point, next_step);
-            println!("Found the following neighbors: {:?}", next_neighbors);
+            let mut total_count: u32 = 0;
+            let mut exit_found = false;
 
-            for neighbor in next_neighbors {
-                if self.map_data[neighbor.y as usize][neighbor.x as usize] == 'E' {
-                    return 1;
+            let mut current_points: Vec<(Point, u32)> = Vec::new();
+            current_points.push((self.starting_point.clone(), total_count));
+            let mut visited_points: Vec<Point> = Vec::new();
+
+            // loop until the heat death of the universe... or we find the end solution.
+            // Rust does not recommend recursion, switching to iterative model
+            // 1. Have list of current points to visit
+            // 2. Have list of visited points
+            // Pop current points stack top
+            // Add new neighbor points that can be visted to the current stack
+            // Add current point to visited list
+            // Might need to add metadata to points (count, indicator of getting to E)
+            // Break out when `E` has been reached or current points is empty
+            while current_points.len() > 0 && !exit_found {
+                println!("Current at: {:?}", current_points);
+                let current_point = current_points.pop().unwrap();
+                //let mut current_point_char = self.get_character(&current_point.0);
+                let neighbors =
+                    self.get_neighbors(&current_point.0, self.next_step(&current_point.0));
+                total_count += 1;
+                for neighbor in neighbors {
+                    println!(
+                        "Neighbor: {}\tValue: {}",
+                        neighbor,
+                        self.get_character(&neighbor)
+                    );
+                    if self.get_character(&neighbor) == 'E' {
+                        println!("GET ME  THE FUCK OUT!");
+                        exit_found = true;
+                    }
+                    if !visited_points.contains(&neighbor) {
+                        current_points.push((neighbor, total_count));
+                    }
                 }
-                count = self.find_shortest_path(&neighbor, count + 1);
+                visited_points.push(current_point.0);
             }
 
-            return count;
+            return total_count;
         }
 
         /// Given a point on the map, get the next char to visit
@@ -133,7 +164,7 @@ mod hill_climber {
         }
     }
 
-    #[derive(Debug)]
+    #[derive(Debug, PartialEq, Clone)]
     /// Index location based on 2D array
     struct Point {
         x: u32,
@@ -149,7 +180,7 @@ mod hill_climber {
     pub fn find_shortest_path(file_name: String) -> u32 {
         let map = parse_file(file_name);
         println!("Map = \n{}", map);
-        return map.find_shortest_path(&map.starting_point, 0);
+        return map.find_shortest_path();
     }
 
     fn parse_file(file_name: String) -> Map {
@@ -241,8 +272,8 @@ mod hill_climber {
         #[test]
         fn test_step_calc_simple() {
             let map = parse_file("sample2.txt".to_string());
-            let steps = map.find_shortest_path(&map.starting_point, 0);
-            assert_eq!(steps, 1, "Steps should be 1 not {}", steps);
+            let steps = map.find_shortest_path();
+            assert_eq!(steps, 2, "Steps should be 2 not {}", steps);
         }
     }
 }
