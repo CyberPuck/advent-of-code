@@ -32,26 +32,57 @@ mod hill_climber {
             // Break out when `E` has been reached or current points is empty
             while current_points.len() > 0 && !exit_found {
                 println!("Current at: {:?}", current_points);
-                let current_point = current_points.pop().unwrap();
+                let current_point = current_points.remove(0);
                 //let mut current_point_char = self.get_character(&current_point.0);
                 let neighbors =
                     self.get_neighbors(&current_point.0, self.next_step(&current_point.0));
-                total_count += 1;
+                total_count = current_point.1 + 1;
                 for neighbor in neighbors {
                     println!(
                         "Neighbor: {}\tValue: {}",
                         neighbor,
                         self.get_character(&neighbor)
                     );
-                    if self.get_character(&neighbor) == 'E' {
+                    if self.get_character(&neighbor) == '{' {
                         println!("GET ME  THE FUCK OUT!");
                         exit_found = true;
                     }
                     if !visited_points.contains(&neighbor) {
-                        current_points.push((neighbor, total_count));
+                        let mut already_in_queue = false;
+                        for point in &current_points {
+                            if point.0 == neighbor {
+                                already_in_queue = true;
+                            }
+                        }
+                        if !already_in_queue {
+                            current_points.push((neighbor, total_count));
+                        }
                     }
                 }
                 visited_points.push(current_point.0);
+                println!("Current_points size: {}", current_points.len());
+            }
+
+            // print out visited regions
+            println!("Visited locations:");
+            for y_index in 0..self.map_data.len() {
+                let mut line_buffer: String = "".to_string();
+                for x_index in 0..self.map_data[y_index].len() {
+                    let test_point = Point {
+                        x: x_index as u32,
+                        y: y_index as u32,
+                    };
+                    if visited_points.contains(&test_point) {
+                        line_buffer.push('x');
+                    } else if test_point == self.starting_point {
+                        line_buffer.push('S');
+                    } else if test_point == self.ending_point {
+                        line_buffer.push('E');
+                    } else {
+                        line_buffer.push('.');
+                    }
+                }
+                println!("{}", line_buffer);
             }
 
             return total_count;
@@ -66,7 +97,7 @@ mod hill_climber {
             // All other ascii based characters should be + 1
             return match current_char {
                 'S' => 'a',
-                'z' => 'E',
+                'z' => '{',
                 _ => next_char,
             };
         }
@@ -209,7 +240,13 @@ mod hill_climber {
                     };
                 }
                 // store data in map
-                map.map_data[row_index].insert(column_index, row_chars[column_index]);
+                if row_chars[column_index] == 'E' {
+                    // Please forgive me, '{' == (z as u32) + 1
+                    // aka the convert end value 'E' to the correct value '{'
+                    map.map_data[row_index].insert(column_index, '{');
+                } else {
+                    map.map_data[row_index].insert(column_index, row_chars[column_index]);
+                }
             }
         }
 
@@ -274,11 +311,15 @@ mod hill_climber {
             let map = parse_file("sample2.txt".to_string());
             let steps = map.find_shortest_path();
             assert_eq!(steps, 2, "Steps should be 2 not {}", steps);
+
+            let map = parse_file("sample3.txt".to_string());
+            let steps = map.find_shortest_path();
+            assert_eq!(steps, 28, "Steps should be 28 not {}", steps);
         }
     }
 }
 
 fn main() {
-    let path_length = hill_climber::find_shortest_path("sample1.txt".to_string());
+    let path_length = hill_climber::find_shortest_path("input1.txt".to_string());
     println!("Shortest path = {}", path_length);
 }
