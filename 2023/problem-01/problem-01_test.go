@@ -34,6 +34,8 @@ func TestLine2Parser(t *testing.T) {
 	var test2Sum = 42
 	test3 := "7pqrstsixteen"
 	test3Sum := 76
+	test4 := "twone345asdfnineight"
+	test4Sum := 28
 	sum, err := CalculateSumInLine(test1)
 	if test1Sum != sum || err != nil {
 		t.Fatalf(`Test 1 failed: %d expected: %d`, sum, test1Sum)
@@ -46,13 +48,18 @@ func TestLine2Parser(t *testing.T) {
 
 	sum, err = CalculateSumInLine(test3)
 	if test3Sum != sum || err != nil {
-		t.Fatalf(`Test 3 failed: %d expected: %d`, sum, test2Sum)
+		t.Fatalf(`Test 3 failed: %d expected: %d`, sum, test3Sum)
+	}
+
+	sum, err = CalculateSumInLine(test4)
+	if test4Sum != sum || err != nil {
+		t.Fatalf(`Test 4 failed: %d expected: %d`, sum, test4Sum)
 	}
 }
 
 func TestCustomParser(t *testing.T) {
 	test1 := "1"
-	test2 := "nine"
+	test2 := "(nine)"
 	test3 := "bad"
 
 	if VerifyIntString(test1) != "1" {

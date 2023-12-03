@@ -5,14 +5,13 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"strconv"
-
 	"regexp"
+	"strconv"
 )
 
 func main() {
-	//var filename = "part1.txt"
-	var filename = "test2.txt"
+	var filename = "part1.txt"
+	//var filename = "test2.txt"
 	fmt.Printf("Reading file: %s\n", filename)
 
 	file, err := os.Open(filename)
@@ -40,20 +39,41 @@ func main() {
 // If there are < 2 digits return an error
 func CalculateSumInLine(parseLine string) (int, error) {
 	fmt.Printf("Entering function :)\n")
-	re := regexp.MustCompile(`[[:digit:]]|(one)|(two)|(three)|(four)|(five)|(six)|(seven)|(eight)|(nine)`)
-	// Note: `-1` means match all instances in string
-	matched := re.FindAll([]byte(parseLine), -1)
-	for index, m := range matched {
-		fmt.Printf("%d, with %s\n", index, m)
+	// Part one regex
+	// re := regexp.MustCompile(`[[:digit:]]|(one)|(two)|(three)|(four)|(five)|(six)|(seven)|(eight)|(nine)`)
+	var expressionList = [10]string{"[[:digit:]]", "(one)", "(two)", "(three)", "(four)", "(five)", "(six)", "(seven)", "(eight)", "(nine)"}
+	// Part two, need to run a regex for all text digits independently
+	// Then need to compare which one starts first and which one ends last
+	var startIndex = len(parseLine)
+	var startNumber = ""
+	var endIndex = 0
+	var endNumber = ""
+
+	// Try all regex indpendently to preserve individual words
+	for _, expression := range expressionList {
+		re := regexp.MustCompile(expression)
+		matches := re.FindAllIndex([]byte(parseLine), -1)
+		var isDigit = expression == "[[:digit:]]"
+		// Run through all matches checking if they are better
+		for _, match := range matches {
+			// convert `[[:digit:]]` to number if needed
+			if isDigit {
+				expression = string(parseLine[match[0]])
+			}
+
+			if match[0] < startIndex || (match[0] == startIndex && startNumber == "") {
+				startIndex = match[0]
+				startNumber = expression
+			}
+			if match[0] > endIndex || (match[0] == endIndex && endNumber == "") {
+				endIndex = match[0]
+				endNumber = expression
+			}
+		}
 	}
-	totalString := ""
-	if len(matched) < 1 {
-		return 0, errors.New("failed to find any digits")
-	} else if len(matched) == 1 {
-		totalString = VerifyIntString(string(matched[0])) + VerifyIntString(string(matched[0]))
-	} else {
-		totalString = VerifyIntString(string(matched[0])) + VerifyIntString(string(matched[len(matched)-1]))
-	}
+
+	// Create the number to return
+	totalString := VerifyIntString(startNumber) + VerifyIntString(endNumber)
 	fmt.Printf("sum: %s\n", totalString)
 	sum, err := strconv.Atoi(totalString)
 	if err != nil {
@@ -69,23 +89,23 @@ func VerifyIntString(line string) string {
 	_, err := strconv.Atoi(line)
 	if err != nil {
 		switch line {
-		case "one":
+		case "(one)":
 			return "1"
-		case "two":
+		case "(two)":
 			return "2"
-		case "three":
+		case "(three)":
 			return "3"
-		case "four":
+		case "(four)":
 			return "4"
-		case "five":
+		case "(five)":
 			return "5"
-		case "six":
+		case "(six)":
 			return "6"
-		case "seven":
+		case "(seven)":
 			return "7"
-		case "eight":
+		case "(eight)":
 			return "8"
-		case "nine":
+		case "(nine)":
 			return "9"
 		default:
 			fmt.Printf("String unknown: %s\n", line)
